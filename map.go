@@ -46,11 +46,13 @@ func (pkmnMap *Map) fetchMapObjects(cells []s2.CellID) (MapObjects, error) {
 		}
 		return result
 	}(cells)
+	latitude := pkmnMap.api.playerCoords.Lat.Degrees()
+	longitude := pkmnMap.api.playerCoords.Lng.Degrees()
 	message := sub.GetMapObjectsRequest{
 		CellId:           cellIds,
 		SinceTimestampMs: pkmnMap.getLastUpdatesInMs(cells),
-		Latitude:         &pkmnMap.api.playerCoords.Lat.Degrees(),
-		Longitude:        pkmnMap.api.playerCoords.Lng.Degrees(),
+		Latitude:         &latitude,
+		Longitude:        &longitude,
 	}
 	fmt.Println(message)
 	return MapObjects{}, nil

@@ -195,8 +195,8 @@ message PokemonFamily {
 }
 
 message GetMapObjectsRequest {
-  optional bytes  cell_id = 1;
-  optional bytes since_timestamp_ms = 2;
+  repeated uint64 cell_id = 1;
+  repeated int64 since_timestamp_ms = 2;
   optional double latitude = 3;
   optional double longitude = 4;
 }
