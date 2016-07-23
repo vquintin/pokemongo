@@ -1,14 +1,7 @@
 package auth
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"regexp"
-	"strings"
-
-	"github.com/vquintin/pokemongo/httpclient"
 	"github.com/AKosterin/goandroidauth"
 )
 
