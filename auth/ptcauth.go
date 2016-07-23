@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vquintin/pokemongo"
+	"github.com/vquintin/pokemongo/httpclient"
 )
 
 const (
