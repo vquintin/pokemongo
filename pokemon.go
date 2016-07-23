@@ -8,9 +8,9 @@ type Pokemon struct {
 
 var ErrInvalidPokemon = errors.New("Invalid pokémon id")
 
-func NewPokemon(uint id) (Pokemon, err) {
+func NewPokemon(id uint) (Pokemon, error) {
 	if id == 0 || id > 151 {
-		return Pokemon{}, err
+		return Pokemon{}, ErrInvalidPokemon
 	}
-	return Pokemon{id}
+	return Pokemon{id}, nil
 }

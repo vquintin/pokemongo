@@ -1,10 +1,11 @@
 package pokemongo
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang/geo/s2"
-	"github.com/vquintin/pokemongo/protobuf/networking/requests/messages"
+	"github.com/vquintin/pokemongo/protobuf/sub"
 	"github.com/vquintin/pokemongo/util"
 )
 
@@ -45,14 +46,14 @@ func (pkmnMap *Map) fetchMapObjects(cells []s2.CellID) (MapObjects, error) {
 		}
 		return result
 	}(cells)
-	message := messages.GetMapObjectsMessage{
+	message := sub.GetMapObjectsRequest{
 		CellId:           cellIds,
 		SinceTimestampMs: pkmnMap.getLastUpdatesInMs(cells),
-		Latitude:         pkmnMap.api.playerCoords.Lat.Degrees(),
+		Latitude:         &pkmnMap.api.playerCoords.Lat.Degrees(),
 		Longitude:        pkmnMap.api.playerCoords.Lng.Degrees(),
 	}
-	fmt.Prinfln(message)
-	return MapObjects{}, err
+	fmt.Println(message)
+	return MapObjects{}, nil
 }
 
 func (pkmnMap Map) getLastUpdatesInMs(cells []s2.CellID) []int64 {

@@ -1,4 +1,4 @@
-package pokemongo
+package httpclient
 
 import (
 	"errors"
@@ -14,4 +14,8 @@ func NewClient() *http.Client {
 	}
 	cookieJar, _ := cookiejar.New(nil)
 	return &http.Client{CheckRedirect: checkRedirect, Jar: cookieJar}
+}
+
+func AddUserAgent(req *http.Request) {
+	req.Header.Add("User-Agent", "Niantic App")
 }

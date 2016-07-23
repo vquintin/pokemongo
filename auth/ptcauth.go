@@ -100,7 +100,7 @@ func getTicket(jd jData, ld PTCLoginDetails, client *http.Client) (ticket, error
 	addContentTypeForm(req)
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
-	if err != nil && err.(*url.Error).Err != pokemongo.ErrSentinel {
+	if err != nil && err.(*url.Error).Err != httpclient.ErrSentinel {
 		return "", err
 	}
 	re, err := regexp.Compile(ticketRe)
