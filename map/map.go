@@ -101,6 +101,15 @@ func makeCellIds(latLng s2.LatLng, width uint) []s2.CellID {
 	cellId := s2.CellIDFromLatLng(latLng).Parent(15)
 	result := s2Cells{}
 	result = append(result, cellId)
+	prev := cellId
+	next := cellId
+	for i := uint(0); i < width; i++ {
+		result = append(result, prev.Prev())
+		result = append(result, next.Prev())
+		prev = prev.Prev()
+		next = next.Next()
+	}
+	result = append(result, cellId.Next())
 	sort.Sort(result)
 	return result
 }

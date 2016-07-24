@@ -31,7 +31,7 @@ func TestGetCatchablePokemons(t *testing.T) {
 	pg := rpc.NewPokemonGo(&connector, client)
 
 	m := NewPokemonMap(pg)
-	poks, err := m.CatchablePokemons(latLng, 3)
+	poks, err := m.CatchablePokemons(latLng, 1)
 	assert.NoError(t, err, "An error occured while retrieving the catchable pokemons")
 	t.Logf("Pokemons:\n")
 	for _, v := range poks {
