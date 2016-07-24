@@ -163,11 +163,3 @@ func chechResponse(response envelope.Response) error {
 	}
 	return nil
 }
-
-func NewPokemonGo(connector auth.PokemonGoConnector, client *http.Client) PokemonGo {
-	return PokemonGo{
-		client:      client,
-		connector:   connector,
-		apiEndPoint: apiURL,
-	}
-}

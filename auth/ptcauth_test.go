@@ -1,22 +1,19 @@
 package auth
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vquintin/pokemongo"
+	"github.com/vquintin/pokemongo/httpclient"
 )
 
 func TestConnection(t *testing.T) {
-	raw, err := ioutil.ReadFile("ptcLoginDetails.json")
-	assert.NoError(t, err, "An error occured while reading the ptc login details")
-	var loginDetails PTCLoginDetails
-	err = json.Unmarshal(raw, &loginDetails)
-	assert.NoError(t, err, "An error occured while decoding the ptc login details")
+	reader, err := os.Open("loginDetails.json")
+	loginDetails, err := LoginDetailsFromJSON(reader)
+	assert.NoError(t, err, "An error occured while decoding the login details")
 
-	connector, err := NewPTCConnector(loginDetails, pokemongo.NewClient())
+	connector, err := NewConnector(loginDetails, httpclient.NewClient())
 
 	assert.NoError(t, err, "An error occured while connecting")
 	info, err := connector.AuthInfo()

@@ -1,7 +1,6 @@
 package pokemongo
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
@@ -19,8 +18,10 @@ type Map struct {
 	lastUpdates map[s2.CellID]time.Time
 }
 
-func (pkmnMap *Map) CatchablePokemons(coords s2.LatLng, width uint) ([]CatchablePokemon, error) {
-	mapResp, err := pkmnMap.fetchMapObjectsResponse(coords, width)
+const catchableWidth = uint(1) // Catchable pokemons are near
+
+func (pkmnMap *Map) CatchablePokemons(coords s2.LatLng) ([]CatchablePokemon, error) {
+	mapResp, err := pkmnMap.fetchMapObjectsResponse(coords, catchableWidth)
 	if err != nil {
 		return []CatchablePokemon{}, err
 	}
@@ -31,7 +32,7 @@ func catchablePokemons(resp sub.GetMapObjectsResponse) ([]CatchablePokemon, erro
 	var catchables []CatchablePokemon
 	for _, mapCell := range resp.GetMapCells() {
 		for _, catchable := range mapCell.CatchablePokemons {
-			pok, err := makePokemon(*catchable)
+			pok, err := makeCatchablePokemon(*catchable)
 			if err != nil {
 				return []CatchablePokemon{}, err
 			}
@@ -41,7 +42,7 @@ func catchablePokemons(resp sub.GetMapObjectsResponse) ([]CatchablePokemon, erro
 	return catchables, nil
 }
 
-func makePokemon(pok sub.MapPokemon) (CatchablePokemon, error) {
+func makeCatchablePokemon(pok sub.MapPokemon) (CatchablePokemon, error) {
 	latLng := s2.LatLngFromDegrees(*pok.Latitude, *pok.Longitude)
 	pokemon, err := common.NewPokemon(common.PokeID(*pok.PokemonId))
 	if err != nil {
@@ -50,6 +51,39 @@ func makePokemon(pok sub.MapPokemon) (CatchablePokemon, error) {
 	return CatchablePokemon{
 		Pokemon: pokemon,
 		LatLng:  latLng,
+	}, nil
+}
+
+func (pkmnMap *Map) NearbyPokemons(coords s2.LatLng, width uint) ([]NearbyPokemon, error) {
+	mapResp, err := pkmnMap.fetchMapObjectsResponse(coords, width)
+	if err != nil {
+		return []NearbyPokemon{}, err
+	}
+	return nearbyPokemons(mapResp)
+}
+
+func nearbyPokemons(resp sub.GetMapObjectsResponse) ([]NearbyPokemon, error) {
+	var nearbies []NearbyPokemon
+	for _, mapCell := range resp.GetMapCells() {
+		for _, nearby := range mapCell.NearbyPokemons {
+			pok, err := makeNearbyPokemon(*nearby)
+			if err != nil {
+				return []NearbyPokemon{}, err
+			}
+			nearbies = append(nearbies, pok)
+		}
+	}
+	return nearbies, nil
+}
+
+func makeNearbyPokemon(pok sub.NearbyPokemon) (NearbyPokemon, error) {
+	pokemon, err := common.NewPokemon(common.PokeID(*pok.PokemonId))
+	if err != nil {
+		return NearbyPokemon{}, err
+	}
+	return NearbyPokemon{
+		Pokemon:  pokemon,
+		distance: float64(*pok.DistanceInMeters),
 	}, nil
 }
 
@@ -70,7 +104,6 @@ func (pkmnMap *Map) fetchMapObjectsResponse(coords s2.LatLng, width uint) (sub.G
 		Latitude:         &latitude,
 		Longitude:        &longitude,
 	}
-	fmt.Println(message)
 	raw, err := pkmnMap.rpc.Execute(coords, enum.RequestMethod_GET_MAP_OBJECTS, &message)
 	if err != nil {
 		return sub.GetMapObjectsResponse{}, err

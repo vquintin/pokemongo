@@ -7,33 +7,28 @@ import (
 )
 
 const (
-	GOOGLE_LOGIN_ANROID_ID  = "9774d56d682e549c"
-	GOOGLE_LOGIN_SERVICE    = "audience:server:client_id:848232511240-7so421jotr2609rmqakceuu1luuq0ptb.apps.googleusercontent.com"
-	GOOGLE_LOGIN_APP        = "com.nianticlabs.pokemongo"
-	GOOGLE_LOGIN_CLIENT_SIG = "321187995bc7cdc2b5fc91b11a96e2baa8602c62"
+	googleLoginAndroiAPI = "9774d56d682e549c"
+	googleLoginService   = "audience:server:client_id:848232511240-7so421jotr2609rmqakceuu1luuq0ptb.apps.googleusercontent.com"
+	googleLoginApp       = "com.nianticlabs.pokemongo"
+	googleLoginClientSig = "321187995bc7cdc2b5fc91b11a96e2baa8602c62"
 )
 
-type GoogleLoginDetails struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type GoogleConnector struct {
+type googleConnector struct {
 	info AuthInfo
 }
 
-func (c *GoogleConnector) AuthInfo() (AuthInfo, error) {
+func (c *googleConnector) AuthInfo() (AuthInfo, error) {
 	return c.info, nil
 }
 
-func NewGoogleConnector(ld GoogleLoginDetails, client *http.Client) (GoogleConnector, error) {
-	tkn, err := getPTCToken(PTCLoginDetails{ld.Username, ld.Password}, client)
-	ptcConnect := GoogleConnector{AuthInfo{Provider: "google", Token: tkn}}
-	return ptcConnect, err
+func newGoogleConnector(ld LoginDetails, client *http.Client) (googleConnector, error) {
+	tkn, err := getPTCToken(ld, client)
+	googleConnect := googleConnector{AuthInfo{Provider: GOOGLE, Token: tkn}}
+	return googleConnect, err
 }
 
-func getGoogleToken(ld GoogleLoginDetails) (Token, error) {
-	naa := goandroidauth.NewAndroidAuth(GOOGLE_LOGIN_ANROID_ID, GOOGLE_LOGIN_APP, GOOGLE_LOGIN_CLIENT_SIG, GOOGLE_LOGIN_SERVICE)
+func getGoogleToken(ld LoginDetails) (Token, error) {
+	naa := goandroidauth.NewAndroidAuth(googleLoginAndroiAPI, googleLoginApp, googleLoginClientSig, googleLoginService)
 
 	token, err := naa.Login(ld.Username, ld.Password)
 

@@ -1,5 +1,2 @@
 .browse.VC*
-auth/ptcLoginDetails.json
-rpc/ptcLoginDetails.json
-messages
-ptcLoginDetails.json
+loginDetails.json

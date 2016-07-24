@@ -20,11 +20,6 @@ const (
 	ptcClientSecret = "w8ScCUXJQc6kXKw8FiOhd8Fixzht18Dq3PEVkUCP5ZPxtgyWsbTvWHFLm2wNY0JR"
 )
 
-type PTCLoginDetails struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 type PTCConnector struct {
 	info AuthInfo
 }
@@ -33,9 +28,9 @@ func (c *PTCConnector) AuthInfo() (AuthInfo, error) {
 	return c.info, nil
 }
 
-func NewPTCConnector(ld PTCLoginDetails, client *http.Client) (PTCConnector, error) {
+func newPTCConnector(ld LoginDetails, client *http.Client) (PTCConnector, error) {
 	tkn, err := getPTCToken(ld, client)
-	ptcConnect := PTCConnector{AuthInfo{Provider: "ptc", Token: tkn}}
+	ptcConnect := PTCConnector{AuthInfo{Provider: PTC, Token: tkn}}
 	return ptcConnect, err
 }
 
@@ -48,7 +43,7 @@ type jData struct {
 
 type ticket string
 
-func getPTCToken(ld PTCLoginDetails, client *http.Client) (Token, error) {
+func getPTCToken(ld LoginDetails, client *http.Client) (Token, error) {
 	jd, err := getJData(client)
 	if err != nil {
 		return "", err
@@ -84,7 +79,7 @@ func getJData(client *http.Client) (jData, error) {
 	return jd, nil
 }
 
-func getTicket(jd jData, ld PTCLoginDetails, client *http.Client) (ticket, error) {
+func getTicket(jd jData, ld LoginDetails, client *http.Client) (ticket, error) {
 	values := url.Values{
 		"lt":        {jd.Lt},
 		"execution": {jd.Execution},
