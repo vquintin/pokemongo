@@ -101,15 +101,14 @@ func makeCellIds(latLng s2.LatLng, width uint) []s2.CellID {
 	cellId := s2.CellIDFromLatLng(latLng).Parent(15)
 	result := s2Cells{}
 	result = append(result, cellId)
-	prev := cellId
-	next := cellId
+	prev := cellId.Prev()
+	next := cellId.Next()
 	for i := uint(0); i < width; i++ {
-		result = append(result, prev.Prev())
-		result = append(result, next.Prev())
+		result = append(result, prev)
+		result = append(result, next)
 		prev = prev.Prev()
 		next = next.Next()
 	}
-	result = append(result, cellId.Next())
 	sort.Sort(result)
 	return result
 }
@@ -117,8 +116,11 @@ func makeCellIds(latLng s2.LatLng, width uint) []s2.CellID {
 func (pkmnMap Map) getLastUpdatesInMs(cells []s2.CellID) []int64 {
 	result := []int64{}
 	for _, v := range cells {
-		date := pkmnMap.lastUpdates[v]
-		millis := util.ConvertToMilliseconds(date)
+		date, ok := pkmnMap.lastUpdates[v]
+		var millis int64
+		if ok {
+			millis = util.ConvertToMilliseconds(date)
+		}
 		result = append(result, millis)
 	}
 	return result
