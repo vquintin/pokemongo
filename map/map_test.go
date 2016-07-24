@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vquintin/pokemongo/auth"
 	"github.com/vquintin/pokemongo/httpclient"
+	"github.com/vquintin/pokemongo/rpc"
 )
 
 func TestGetCatchablePokemons(t *testing.T) {
@@ -27,16 +28,13 @@ func TestGetCatchablePokemons(t *testing.T) {
 	lat := 48.8462
 	lng := 2.3372
 	latLng := s2.LatLngFromDegrees(lat, lng)
-	pg := NewPokemonGo(&connector, client, s2.LatLngFromDegrees(lat, lng))
+	pg := rpc.NewPokemonGo(&connector, client)
 
 	m := NewPokemonMap(pg)
-
-	cell := s2.CellIDFromLatLng(latLng).Parent(15)
-
-	mo, err := m.fetchMapObjects([]s2.CellID{cell})
-	assert.NoError(t, err, "An error occured while retrieving the map objects")
+	poks, err := m.CatchablePokemons(latLng, 3)
+	assert.NoError(t, err, "An error occured while retrieving the catchable pokemons")
 	t.Logf("Pokemons:\n")
-	for _, v := range mo.CatchablePokemons() {
+	for _, v := range poks {
 		t.Logf("%v\n", v)
 	}
 }

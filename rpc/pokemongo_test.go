@@ -1,4 +1,4 @@
-package pokemongo
+package rpc
 
 import (
 	"encoding/json"
@@ -27,11 +27,9 @@ func TestCanCommunicateWithPokemonGoAPI(t *testing.T) {
 	assert.NoError(t, err, "Error occured while retrieving log info")
 	t.Logf("Auth info: %v", authInfo)
 
-	lat := 48.846944
-	lng := 2.336944
-	pg := NewPokemonGo(&connector, client, s2.LatLngFromDegrees(lat, lng))
-
-	raw, err = pg.Execute(enum.RequestMethod_GET_PLAYER, &sub.GetPlayerRequest{})
+	pg := NewPokemonGo(&connector, client)
+	playerCoords := s2.LatLngFromDegrees(48.846944, 2.336944)
+	raw, err = pg.Execute(playerCoords, enum.RequestMethod_GET_PLAYER, &sub.GetPlayerRequest{})
 	assert.NoError(t, err, "An error occured while executing the request")
 
 	var playerResponse sub.GetPlayerResponse

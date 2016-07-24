@@ -1,4 +1,4 @@
-package pokemongo
+package rpc
 
 import (
 	"bytes"
@@ -8,8 +8,6 @@ import (
 	"net/http"
 
 	"math"
-
-	"os"
 
 	"github.com/golang/geo/s2"
 	"github.com/golang/protobuf/proto"
@@ -29,15 +27,14 @@ const (
 )
 
 type PokemonGo struct {
-	client       *http.Client
-	connector    auth.PokemonGoConnector
-	playerCoords s2.LatLng
-	authTicket   envelope.AuthTicket
-	apiEndPoint  string
+	client      *http.Client
+	connector   auth.PokemonGoConnector
+	authTicket  envelope.AuthTicket
+	apiEndPoint string
 }
 
-func (pg *PokemonGo) Execute(requestMethod enum.RequestMethod, request proto.Message) ([]byte, error) {
-	reqEnv, err := pg.prepareRequest(requestMethod, request)
+func (pg *PokemonGo) Execute(playerCoords s2.LatLng, requestMethod enum.RequestMethod, request proto.Message) ([]byte, error) {
+	reqEnv, err := pg.prepareRequest(playerCoords, requestMethod, request)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -48,7 +45,7 @@ func (pg *PokemonGo) Execute(requestMethod enum.RequestMethod, request proto.Mes
 	pg.updateState(respEnv)
 	err = chechResponse(respEnv)
 	if err == errIncorrectAPIEndpoint {
-		return pg.Execute(requestMethod, request)
+		return pg.Execute(playerCoords, requestMethod, request)
 	}
 	if err != nil {
 		return []byte{}, err
@@ -56,7 +53,7 @@ func (pg *PokemonGo) Execute(requestMethod enum.RequestMethod, request proto.Mes
 	return respEnv.Responses[0], nil
 }
 
-func (pg *PokemonGo) prepareRequest(requestMethod enum.RequestMethod, request proto.Message) (envelope.Request, error) {
+func (pg *PokemonGo) prepareRequest(playerCoords s2.LatLng, requestMethod enum.RequestMethod, request proto.Message) (envelope.Request, error) {
 	raw, err := proto.Marshal(request)
 	if err != nil {
 		return envelope.Request{}, err
@@ -69,8 +66,8 @@ func (pg *PokemonGo) prepareRequest(requestMethod enum.RequestMethod, request pr
 	reqs[0] = &req
 	direction := enum.RpcDirection_REQUEST
 	requestID := requestID
-	latitude := math.Float64bits(pg.playerCoords.Lat.Degrees())
-	longitude := math.Float64bits(pg.playerCoords.Lng.Degrees())
+	latitude := math.Float64bits(playerCoords.Lat.Degrees())
+	longitude := math.Float64bits(playerCoords.Lng.Degrees())
 	altitude := uint64(0)
 	unknown12 := unknown12
 	reqEnv := envelope.Request{
@@ -100,7 +97,6 @@ func (pg *PokemonGo) sendRequest(request envelope.Request) (envelope.Response, e
 	if err != nil {
 		return envelope.Response{}, err
 	}
-	ioutil.WriteFile("toto.bin", raw, os.ModePerm)
 	httpReq, err := http.NewRequest("POST", pg.apiEndPoint, bytes.NewReader(raw))
 	if err != nil {
 		return envelope.Response{}, err
@@ -168,11 +164,10 @@ func chechResponse(response envelope.Response) error {
 	return nil
 }
 
-func NewPokemonGo(connector auth.PokemonGoConnector, client *http.Client, playerCoords s2.LatLng) PokemonGo {
+func NewPokemonGo(connector auth.PokemonGoConnector, client *http.Client) PokemonGo {
 	return PokemonGo{
-		client:       client,
-		connector:    connector,
-		playerCoords: playerCoords,
-		apiEndPoint:  apiURL,
+		client:      client,
+		connector:   connector,
+		apiEndPoint: apiURL,
 	}
 }

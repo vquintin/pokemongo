@@ -1,4 +1,4 @@
-package pokemongo
+package common
 
 import "fmt"
 
@@ -180,7 +180,7 @@ func (pk Pokemon) Name() string {
 }
 
 func (pk Pokemon) String() string {
-	return fmt.Sprintf("%3d %v", pk.id, pk.Name())
+	return fmt.Sprintf("(%03d) %v", pk.id, pk.Name())
 }
 
 func NewPokemon(id PokeID) (Pokemon, error) {

@@ -1,4 +1,4 @@
-package pokemongo
+package common
 
 import "testing"
 import "github.com/stretchr/testify/assert"
