@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/golang/geo/s2"
+	"github.com/golang/protobuf/proto"
+	"github.com/vquintin/pokemongo/protobuf/enum"
 	"github.com/vquintin/pokemongo/protobuf/sub"
 	"github.com/vquintin/pokemongo/util"
 )
@@ -55,7 +57,32 @@ func (pkmnMap *Map) fetchMapObjects(cells []s2.CellID) (MapObjects, error) {
 		Longitude:        &longitude,
 	}
 	fmt.Println(message)
-	return MapObjects{}, nil
+	raw, err := pkmnMap.api.Execute(enum.RequestMethod_GET_MAP_OBJECTS, &message)
+	if err != nil {
+		return MapObjects{}, err
+	}
+	var mapResp sub.GetMapObjectsResponse
+	err = proto.Unmarshal(raw, &mapResp)
+	if err != nil {
+		return MapObjects{}, err
+	}
+	var catchables []CatchablePokemon
+	for _, mapCell := range mapResp.GetMapCells() {
+		for _, catchable := range mapCell.CatchablePokemons {
+			pok := makePokemon(*catchable)
+			catchables = append(catchables, pok)
+		}
+	}
+	return MapObjects{catchables}, nil
+}
+
+func makePokemon(pok sub.MapPokemon) CatchablePokemon {
+	latLng := s2.LatLngFromDegrees(*pok.Latitude, *pok.Longitude)
+	id := uint(*pok.PokemonId)
+	return CatchablePokemon{
+		Pokemon{Id: id},
+		latLng,
+	}
 }
 
 func (pkmnMap Map) getLastUpdatesInMs(cells []s2.CellID) []int64 {
@@ -66,4 +93,8 @@ func (pkmnMap Map) getLastUpdatesInMs(cells []s2.CellID) []int64 {
 		result = append(result, millis)
 	}
 	return result
+}
+
+func NewPokemonMap(api PokemonGo) Map {
+	return Map{api: api}
 }

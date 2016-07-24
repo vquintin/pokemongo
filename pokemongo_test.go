@@ -37,5 +37,7 @@ func TestCanCommunicateWithPokemonGoAPI(t *testing.T) {
 	var playerResponse sub.GetPlayerResponse
 	err = proto.Unmarshal(raw, &playerResponse)
 	assert.NoError(t, err, "Could not get the player profile")
-	t.Logf("Username: %v\n", playerResponse.Profile.Username)
+	assert.NotNil(t, playerResponse.Profile, "Player profile is empty")
+	assert.NotNil(t, playerResponse.Profile.Username, "Player username is empty")
+	t.Logf("Username: %v\n", *playerResponse.Profile.Username)
 }

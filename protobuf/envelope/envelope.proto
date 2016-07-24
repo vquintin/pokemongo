@@ -47,7 +47,7 @@ message Response {
   required enum.RpcDirection direction = 1;
   optional int64 unknown2 = 2;
   optional string api_url = 3;
-  required Unknown6 unknown6 = 6;
+  optional Unknown6 unknown6 = 6;
   optional AuthTicket auth_ticket = 7;
   repeated bytes responses = 100;
 
