@@ -31,7 +31,7 @@ func (pkmnMap *Map) mapObjects() (MapObjects, error) {
 
 func (pkmnMap *Map) makeCellIds(latLng s2.LatLng) []s2.CellID {
 	cellId := s2.CellIDFromLatLng(latLng).Parent(15)
-	result := make([]s2.CellID, 0, 9)
+	result := []s2.CellID{}
 	result = append(result, cellId)
 	result = append(result, cellId.VertexNeighbors(15)...)
 	for _, v := range cellId.EdgeNeighbors() {
@@ -42,7 +42,7 @@ func (pkmnMap *Map) makeCellIds(latLng s2.LatLng) []s2.CellID {
 
 func (pkmnMap *Map) fetchMapObjects(cells []s2.CellID) (MapObjects, error) {
 	cellIds := func(cells []s2.CellID) []uint64 {
-		result := make([]uint64, len(cells))
+		result := []uint64{}
 		for _, v := range cells {
 			result = append(result, uint64(v))
 		}
@@ -69,24 +69,30 @@ func (pkmnMap *Map) fetchMapObjects(cells []s2.CellID) (MapObjects, error) {
 	var catchables []CatchablePokemon
 	for _, mapCell := range mapResp.GetMapCells() {
 		for _, catchable := range mapCell.CatchablePokemons {
-			pok := makePokemon(*catchable)
+			pok, err := makePokemon(*catchable)
+			if err != nil {
+				return MapObjects{}, err
+			}
 			catchables = append(catchables, pok)
 		}
 	}
 	return MapObjects{catchables}, nil
 }
 
-func makePokemon(pok sub.MapPokemon) CatchablePokemon {
+func makePokemon(pok sub.MapPokemon) (CatchablePokemon, error) {
 	latLng := s2.LatLngFromDegrees(*pok.Latitude, *pok.Longitude)
-	id := uint(*pok.PokemonId)
-	return CatchablePokemon{
-		Pokemon{Id: id},
-		latLng,
+	pokemon, err := NewPokemon(PokeID(*pok.PokemonId))
+	if err != nil {
+		return CatchablePokemon{}, err
 	}
+	return CatchablePokemon{
+		Pokemon: pokemon,
+		LatLng:  latLng,
+	}, nil
 }
 
 func (pkmnMap Map) getLastUpdatesInMs(cells []s2.CellID) []int64 {
-	result := make([]int64, len(cells))
+	result := []int64{}
 	for _, v := range cells {
 		date := pkmnMap.lastUpdates[v]
 		millis := util.ConvertToMilliseconds(date)

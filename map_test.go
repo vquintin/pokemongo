@@ -24,8 +24,8 @@ func TestGetCatchablePokemons(t *testing.T) {
 	assert.NoError(t, err, "Error occured while retrieving log info")
 	t.Logf("Auth info: %v", authInfo)
 
-	lat := 48.846944
-	lng := 2.336944
+	lat := 48.8462
+	lng := 2.3372
 	latLng := s2.LatLngFromDegrees(lat, lng)
 	pg := NewPokemonGo(&connector, client, s2.LatLngFromDegrees(lat, lng))
 

@@ -9,6 +9,8 @@ import (
 
 	"math"
 
+	"os"
+
 	"github.com/golang/geo/s2"
 	"github.com/golang/protobuf/proto"
 	"github.com/vquintin/pokemongo/auth"
@@ -98,6 +100,7 @@ func (pg *PokemonGo) sendRequest(request envelope.Request) (envelope.Response, e
 	if err != nil {
 		return envelope.Response{}, err
 	}
+	ioutil.WriteFile("toto.bin", raw, os.ModePerm)
 	httpReq, err := http.NewRequest("POST", pg.apiEndPoint, bytes.NewReader(raw))
 	if err != nil {
 		return envelope.Response{}, err
