@@ -3,6 +3,9 @@ package sub;
 
 import "github.com/vquintin/pokemongo/protobuf/enum/enum.proto";
 
+message GetPlayerRequest {
+}
+
 message GetPlayerResponse {
     optional int32 unknown1 = 1;
     optional Profile profile = 2;

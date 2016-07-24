@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/golang/geo/s2"
+	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/vquintin/pokemongo/auth"
 	"github.com/vquintin/pokemongo/httpclient"
-	"github.com/vquintin/pokemongo/protobuf/networking/requests"
-	"github.com/vquintin/pokemongo/protobuf/networking/requests/messages"
+	"github.com/vquintin/pokemongo/protobuf/enum"
+	"github.com/vquintin/pokemongo/protobuf/sub"
 )
 
 func TestCanCommunicateWithPokemonGoAPI(t *testing.T) {
@@ -22,11 +23,19 @@ func TestCanCommunicateWithPokemonGoAPI(t *testing.T) {
 	client := httpclient.NewClient()
 	connector, err := auth.NewPTCConnector(loginDetails, client)
 	assert.NoError(t, err, "Could not connect")
+	authInfo, err := connector.AuthInfo()
+	assert.NoError(t, err, "Error occured while retrieving log info")
+	t.Logf("Auth info: %v", authInfo)
 
 	lat := 48.846944
 	lng := 2.336944
 	pg := NewPokemonGo(&connector, client, s2.LatLngFromDegrees(lat, lng))
 
-	raw, err = pg.Execute(requests.RequestType_GET_PLAYER, &messages.GetPlayerMessage{})
+	raw, err = pg.Execute(enum.RequestMethod_GET_PLAYER, &sub.GetPlayerRequest{})
+	assert.NoError(t, err, "An error occured while executing the request")
 
+	var playerResponse sub.GetPlayerResponse
+	err = proto.Unmarshal(raw, &playerResponse)
+	assert.NoError(t, err, "Could not get the player profile")
+	t.Logf("Username: %v\n", playerResponse.Profile.Username)
 }

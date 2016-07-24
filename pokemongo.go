@@ -3,6 +3,7 @@ package pokemongo
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -80,15 +81,20 @@ func (pg *PokemonGo) Execute(requestMethod enum.RequestMethod, request proto.Mes
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Got status %v for request", resp.StatusCode)
+	}
 	raw, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Raw response: %v\n", raw)
 	var respEnv envelope.Response
 	err = proto.Unmarshal(raw, &respEnv)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Response: %v\n", respEnv)
 	if respEnv.ApiUrl != nil && *respEnv.ApiUrl != "" {
 		pg.apiEndPoint = *respEnv.ApiUrl
 	}
